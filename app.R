@@ -1,22 +1,21 @@
-
-library(DBI)
-library(dplyr)
-library(DT)
-library(echarts4r)
-library(ggplot2)
-library(htmlwidgets)
-library(jsonlite)
-library(plotly)
-library(rintrojs)
-library(RPostgres)
 library(shiny)
-library(shinybrowser)
 library(shinyBS)
-library(shinycssloaders)
-library(shinydashboard)
-library(shinydashboardPlus)
 library(shinyhelper)
 library(shinyWidgets)
+library(shinydashboard)
+library(shinydashboardPlus)
+library(shinycssloaders)
+library(DT)
+library(dplyr)
+library(eulerr)
+library(ggplot2)
+library(dplyr)
+library(rintrojs)
+library(plotly)
+library(DBI)
+library(RPostgres)
+library(echarts4r)
+library(jsonlite)
 
 
 
@@ -83,6 +82,7 @@ ui <- shinydashboardPlus::dashboardPage(
     div(id = "check_box",
       checkboxGroupInput("inCheckboxGroup1", "Selected SNPs:"),
       checkboxGroupInput("inCheckboxGroup2", "Selected traits:")),
+    div(id = "buttons", 
     fluidRow(column(6,
                div(actionButton("refresh", "Unselect",
                                 icon = tags$i(class = "fa fa-refresh",
@@ -93,7 +93,7 @@ ui <- shinydashboardPlus::dashboardPage(
                                 icon = tags$i(class = "far fa-play-circle",
                                               style="font-size: 10px"),
                                 class = "btn-success"),
-                   align = "center"))),
+                   align = "center")))),
     # filter ====
     div(id = "ui_filter",
       sliderTextInput(
@@ -520,7 +520,6 @@ server <- function(input, output, session) {
                          height = "800px"), type = 6)
         )})
         output$ui_polar <- renderUI({tagList(
-          # includeScript("www/polar_hetero.js"),
           shinycssloaders::withSpinner(
             echarts4rOutput("polar_bt", width = "100%", height = "700px"),
             type = 6)
@@ -557,7 +556,6 @@ server <- function(input, output, session) {
           column(6, h4("Quantitative traits"), plot2))
         )})
         output$ui_polar <- renderUI({tagList(
-          # includeScript("www/polar_hetero.js"),
           fluidRow(
           column(6, h4("Binary traits"), plot3),
           column(6, h4("Quantitative traits"), plot4))
