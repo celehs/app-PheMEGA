@@ -1,8 +1,8 @@
 step	element	intro	position	title
 1	NA	Please wait for loading data.	right	Welcome!
-2	#ui_searchbox	<b>Step 1:  </b> Enter a SNP, GENE, Phenotype name, Phecode number, lab, survey question, or vital. <br>Note: Plesase use exact search terms and variables, for example: "Phecode:250" or "250"; "BRACA1"; "SMKAG".	right	Search box
+2	#ui_searchbox	<b>Step 1:  </b> Enter a SNP, GENE, Phenotype name, Phecode number, lab, survey question, or vital signs. <br>Note: Plesase use exact search terms and variables, for example: "Phecode:250" or "250"; "BRACA1"; "SMKAG".	right	Search box
 3	#ui_table	<b>Step 2:  </b> Click to select 1 row in the search results.	right	Input table
-4	#ui_checkbox_ances	<b>Step 3:  </b> Select ancestry (select multiple to compare results across ancestries).	right	Ancestries
+4	#ui_checkbox_ances	<b>Step 3:  </b> Select the populations (select multiple to compare results across the populations).	right	The populations
 5	#check_box	<b>Step 4:  </b> Select the traits you would like to screen the results by here. If searching by SNP, select which SNPs you would like the results for.	right	Candidate nodes
 6	#buttons	<b>Step 5:  </b> Submit your selection to the server and show the network.<br><b>Unselect:  </b>Press this button to clear your selection.	right	Buttons
 8	#ui_filter	To adjust the threshold p-value. (Optional Step)	right	Threshold of the p-value

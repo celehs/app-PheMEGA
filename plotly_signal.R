@@ -10,7 +10,7 @@ signal_plotly <- function(df, thr_pval = 5 * 10^-8, type = "column") {
   colors <- list("EUR" = "#E41A1C",
                  "AFR" = "#377EB8",
                  "AMR" = "#4DAF4A",
-                 "ESA" = "#984EA3",
+                 "EAS" = "#984EA3",
                  "META" = "#FF7F00")
 
   df$pval <- signif(df$pval, 2)
@@ -46,13 +46,14 @@ signal_plotly <- function(df, thr_pval = 5 * 10^-8, type = "column") {
   fig <- plot_ly(data = df, x = ~desc, y = ~p, color = ~ance,
                  hovertext = ~paste(desc, " (", to, ")",
                                "<br>P-value: ", pval, '<br>', toupper(variable), ': ', value,
-                               '<br>Heterogeneity adjusted P-value (vs EUR): ', hetero, '<br>MAF:', maf),
+                               # '<br>Heterogeneity adjusted P-value (vs EUR): ', hetero, 
+                               '<br>MAF:', maf),
                  hoverinfo = "text",
                  type = 'scatter', mode = 'markers', 
                  colors = unlist(colors[sort(unique(df$ance))])) %>%
            layout(hovermode = "x", 
                   yaxis = list(title = '-log10(P-value)'), 
-                  legend = list(title=list(text='<b>Ancestries</b>')),
+                  legend = list(title=list(text='<b>Population</b>')),
                   xaxis = list(title = list(text=NULL), tickangle = 45,
                                categoryorder = "array", 
                                categoryarray = unique(df$desc)))

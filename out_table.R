@@ -59,11 +59,11 @@ out_table <- function(df, dict, num_samples, sortby = "Variable", decreasing = F
     df_show <- df_show[, c("ance", "to", "desc", "pval", "variable", "value", "p_heter_adj", "num_samples", "group")]
     df_show$variable[df_show$variable == "beta"] <- "continuous"
     df_show$variable[df_show$variable == "or"] <- "binary"
-    colnames(df_show) <- c("Ance", "Variable", "Description", "P-value", "Trait Type", "Value", "Heterogeneity Adjusted P-value (to EUR)", "Num_samples(cases/controls)", "Group")
+    colnames(df_show) <- c("Population", "Variable", "Description", "P-value", "Trait Type", "Value", "Heterogeneity Adjusted P-value (to EUR)", "Num_samples(cases/controls)", "Group")
   } else {
     df_show$from <- dict$desc[match(df_show$from, dict$id)]
     df_show <- df_show[, c("ance", "to", "desc", "pval", "maf", "value", "p_heter_adj", "group")]
-    colnames(df_show) <- c("Ance", "Variable", "Description chr:pos:alt:ref", "P-value", "Maf", toupper(unique(df$variable)), "Heterogeneity Adjusted P-value (to EUR)", "Gene")
+    colnames(df_show) <- c("Population", "Variable", "Description chr:pos:alt:ref", "P-value", "Maf", toupper(unique(df$variable)), "Heterogeneity Adjusted P-value (to EUR)", "Gene")
   }
 
   df_show

@@ -19,7 +19,7 @@ hetero_polar <- function(selected, thr_p = 0.05, groups = NULL) {
   colors <- list("EUR" = "#FFCCCC",
                  "AFR" = "#377EB8",
                  "AMR" = "#4DAF4A",
-                 "ESA" = "#984EA3")
+                 "EAS" = "#984EA3")
 
 
   if (!is.null(groups)) {
@@ -28,7 +28,7 @@ hetero_polar <- function(selected, thr_p = 0.05, groups = NULL) {
   
   isOR <- toupper(unique(selected$variable)) == "OR"
 
-  title <- ifelse(isOR, "Odds Ratio", "Beta Coef")
+  title <- ifelse(isOR, "Odds Ratio", "Beta Coefficient")
 
   if (nrow(selected) > 50) {
     title <- paste0(title, " (Only show top 20)")
@@ -42,7 +42,7 @@ hetero_polar <- function(selected, thr_p = 0.05, groups = NULL) {
   selected$hetero <- signif(selected$p_heter_adj, 2)
   selected$pval <- signif(selected$pval, 2)
   selected$maf <- signif(selected$maf, 2)
-  selected$value <- signif(selected$value, 2)
+  selected$value <- signif(selected$value, 3)
 
   meta <- as.data.frame(t(selected[, c("pval", "maf", "hetero", "desc")]))
   meta_l <- as.list(meta)
@@ -52,7 +52,7 @@ hetero_polar <- function(selected, thr_p = 0.05, groups = NULL) {
   if (isOR) {
     selected$value <- selected$value - 1
   }
-  
+
   selected |>
     group_by(ance) |>
     e_charts(to, renderer = "svg") |>
@@ -61,7 +61,7 @@ hetero_polar <- function(selected, thr_p = 0.05, groups = NULL) {
     e_radius_axis(axisLabel = list(
       formatter = htmlwidgets::JS("function (value, index) {
         if (", tolower(isOR), ") {
-          return (value + 1).toFixed(1);
+          return (value + 1).toFixed(2);
         } else {
           return (value).toFixed(2);
         }
@@ -89,12 +89,11 @@ hetero_polar <- function(selected, thr_p = 0.05, groups = NULL) {
            s += '<tr><td><span style=\"color:' + params[i].color + '\">&#x25CF</span> ' + params[i].seriesName + '</td><td>'+blank+'</td><td>' + meta[index][0] + '</td><td>'+blank+'</td><td>' + value + '</td><td>'+blank+'</td><td align=\"right\">' + meta[index][2] + '</td><td>'+blank+'</td><td>'+ meta[index][1] +'</td></tr>';
          }
         }
-        s = '<table><tr><th>Ance</th><th>'+blank+'</th><th>P-value</th><th>'+blank+'</th><th>' + '", unique(toupper(selected$variable)), "' + '</th><th>'+blank+'</th><th>hetero (vs EUR)</th><th>'+blank+'</th><th>MAF</th></tr>' + s + '</table>';
+        s = '<table><tr><th>Population</th><th>'+blank+'</th><th>P-value</th><th>'+blank+'</th><th>' + '", unique(toupper(selected$variable)), "' + '</th><th>'+blank+'</th><th>hetero (vs EUR)</th><th>'+blank+'</th><th>MAF</th></tr>' + s + '</table>';
         s = '<b>' + params[0].name + ':&nbsp;&nbsp;</b>' + meta[params[0].name + '_' + params[0].seriesName][3] + '<br>' + s;
         return s;
       }
-    "))
-    )  |>
+    "))) |>
     e_title(title) |>
     e_toolbox_feature(feature = "saveAsImage") |>
     e_toolbox_feature(feature = "dataView")

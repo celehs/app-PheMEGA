@@ -25,11 +25,15 @@ source("plotly_hetero.R")
 source("hetero_polar.R")
 source("out_table.R")
 source("utils.R")
-
+version <- "v20230920_full"
+tb_dict <- paste0("dict_", version)
+tb_edge <- paste0("df_edges_", version)
+tb_init <- paste0("init_Phe250_11_", version)
 steps <- readRDS("doc/steps.rds")
-dict <- getTable("dict_v20220905_2")
+dict <- getTable(tb_dict)
+print(table(dict$group[!grepl("^rs\\d+$", dict$desc, perl = TRUE)]))
 num_samples <- getTable("num_samples")
-init_Phe250_11 <- getTable("init_Phe250_11_v20220905_2")
+init_Phe250_11 <- getTable(tb_init)
 
 # header ====
 header <- shinydashboardPlus::dashboardHeader(
@@ -44,8 +48,8 @@ header <- shinydashboardPlus::dashboardHeader(
                  style = "padding: 6px 20px 6px 20px;",
                  title = "The introduction of the app."
     ),
-    actionButton("help", " Help",
-                 icon = icon("question"),
+    actionButton("help", " Tutorial",
+                 # icon = icon("question"),
                  class = "btn btn-primary header-button",
                  width = "100px",
                  style = "padding: 6px 20px 6px 20px;",
@@ -63,14 +67,15 @@ ui <- shinydashboardPlus::dashboardPage(
     disable = FALSE,
     minified = FALSE,
     div(id = "ui_searchbox",
-      searchInput(
-        inputId = "searchbox",
-        label = "Enter your search: ",
-        placeholder = "PheCode:250",
-        value = NULL,
-        btnSearch = icon("search"),
-        width = "100%"
-      )),
+        searchInput(
+          inputId = "searchbox",
+          label = "Enter your search: ",
+          placeholder = "PheCode:250",
+          value = NULL,
+          btnReset = icon("xmark"),
+          btnSearch = icon("search"),
+          width = "100%"
+        )),
     uiOutput("ui_table") %>%
       shinyhelper::helper(type = "markdown",
                           colour = "white",
@@ -80,31 +85,31 @@ ui <- shinydashboardPlus::dashboardPage(
                           style = "margin-right: 5px;"),
     uiOutput("ui_checkbox_ances"),
     div(id = "check_box",
-      checkboxGroupInput("inCheckboxGroup1", "Selected SNPs:"),
-      checkboxGroupInput("inCheckboxGroup2", "Selected traits:")),
+        checkboxGroupInput("inCheckboxGroup1", "Selected SNPs:"),
+        checkboxGroupInput("inCheckboxGroup2", "Selected traits:")),
     div(id = "buttons", 
-    fluidRow(column(6,
-               div(actionButton("refresh", "Unselect",
-                                icon = tags$i(class = "fa fa-refresh",
-                                              style="font-size: 10px")),
-                   align = "center")),
-             column(6,
-               div(actionButton("goButton", "Submit",
-                                icon = tags$i(class = "far fa-play-circle",
-                                              style="font-size: 10px"),
-                                class = "btn-success"),
-                   align = "center")))),
+        fluidRow(column(6,
+                        div(actionButton("refresh", "Unselect",
+                                         icon = tags$i(class = "fa fa-refresh",
+                                                       style="font-size: 10px")),
+                            align = "center")),
+                 column(6,
+                        div(actionButton("goButton", "Submit",
+                                         icon = tags$i(class = "far fa-play-circle",
+                                                       style="font-size: 10px"),
+                                         class = "btn-success"),
+                            align = "center")))),
     # filter ====
     div(id = "ui_filter",
-      sliderTextInput(
-        inputId = "thr_p",
-        label = "Filter by P-value:",
-        choices = c(0, 10^-15, 10^-14, 10^-13, 10^-12, 10^-11, 10^-10, 10^-9,
-        10^-8, 5 * 10^-8, 10^-7, 10^-6, 10^-5, 10^-4, 10^-3, 10^-2),
-        selected = 5 * 10^-8,
-        grid = TRUE,
-        width = "100%"))),
-
+        sliderTextInput(
+          inputId = "thr_p",
+          label = "Filter by P-value:",
+          choices = c(0, 10^-15, 10^-14, 10^-13, 10^-12, 10^-11, 10^-10, 10^-9,
+                      10^-8, 5 * 10^-8, 10^-7, 10^-6, 10^-5, 10^-4, 10^-3, 10^-2),
+          selected = 5 * 10^-8,
+          grid = TRUE,
+          width = "100%"))),
+  
   # body ====
   dashboardBody(
     includeCSS("www/style.css"),
@@ -137,15 +142,15 @@ ui <- shinydashboardPlus::dashboardPage(
                                     grid = TRUE,
                                     width = "100%"
                                   )),
-                           column(3, uiOutput("ui_slider_maf")),
+                           # column(3, uiOutput("ui_slider_maf")),
                            column(3, div(align = "center",
-                                  radioButtons(
-                                    inputId = "s_ance_1",
-                                    label = "To compare with EUR:",
-                                    choices = c("AFR", "AMR", "ESA"),
-                                    selected = "AFR",
-                                    inline = TRUE
-                                  ))),
+                                         radioButtons(
+                                           inputId = "s_ance_1",
+                                           label = "To compare with EUR:",
+                                           choices = c("AFR", "AMR", "EAS"),
+                                           selected = "AFR",
+                                           inline = TRUE
+                                         ))),
                            column(3, uiOutput("ui_hetero_groups"))),
                          fluidRow(uiOutput("ui_barplot")),
                          hr(),
@@ -154,31 +159,32 @@ ui <- shinydashboardPlus::dashboardPage(
                 tabPanel(title = "Table",
                          br(),
                          column(8,
-                           radioButtons("sort_by", "Sort the table by:",
-                                        choices = c("Variable", "P-value", 
-                                          "Heterogeneity Adjusted P-value (to EUR)"),
-                                        selected = "Variable", inline = TRUE)),
+                                radioButtons("sort_by", "Sort the table by:",
+                                             choices = c("Variable", "P-value", 
+                                                         "Heterogeneity Adjusted P-value (to EUR)"),
+                                             selected = "Variable", inline = TRUE)),
                          column(4, 
-                           shinyWidgets::switchInput("sort_decreasing", "Decreasing", 
-                             value = FALSE)),
+                                shinyWidgets::switchInput("sort_decreasing", "Decreasing", 
+                                                          value = FALSE)),
                          DT::dataTableOutput("set_table"))
     )
   )
 )
 
 server <- function(input, output, session) {
-
+  
   # input table ====
   df_input <- eventReactive(input$searchbox, {
     print("df_input")
     print(input$searchbox)
     if (isTruthy(input$searchbox)) {
-      searchDict(input$searchbox, "dict_v20220905_2")
+      searchDict(input$searchbox, tb_dict)
     } else {
-      searchDict("PheCode:250", "dict_v20220905_2")
+      searchDict("PheCode:250", tb_dict)
     }
+    
   }, ignoreNULL = FALSE)
-
+  
   output$ui_table <- renderUI({
     print("ui_table")
     req(df_input())
@@ -191,7 +197,7 @@ server <- function(input, output, session) {
       ""
     }
   })
-
+  
   output$table <- DT::renderDataTable(DT::datatable({
     df <- df_input()[, c("id", "desc", "group")]
     if (grepl("^\\d.+", df$id[1])) {
@@ -199,33 +205,33 @@ server <- function(input, output, session) {
     }
     df
   }, rownames = FALSE,
-    selection = list(mode = "single",
-                     selected = 2,
-                     target = "row"),
+  selection = list(mode = "single",
+                   selected = 2,
+                   target = "row"),
   options = list(pagingType = "simple", pageLength = 5, dom = "lrtip")
-    ), server = TRUE)
-
+  ), server = TRUE)
+  
   # cbox_ances ====
   observeEvent(input$table_rows_selected,{
     if (length(input$table_rows_selected) == 1) {
       output$ui_checkbox_ances <- renderUI({
-        checkboxGroupInput("checkbox_ances", "Select ancestries",
+        checkboxGroupInput("checkbox_ances", "Select the populations",
                            choiceNames = c("META", "African(AFR)",
                                            "Admixed American(AMR)",
-                                           "East Asian(ESA)",
+                                           "East Asian(EAS)",
                                            "European(EUR)"),
-                           choiceValues = c("META", "AFR", "AMR", "ESA", "EUR"),
+                           choiceValues = c("META", "AFR", "AMR", "EAS", "EUR"),
                            inline = TRUE,
                            selected = c("AFR", "EUR"))
       })
     }
   })
-
+  
   # center_nodes ====
   s1 <- eventReactive(input$goButton, {
     input$inCheckboxGroup1
   })
-
+  
   s2 <- eventReactive(input$goButton, {
     # init data
     if(!isTruthy(input$goButton)){
@@ -234,21 +240,22 @@ server <- function(input, output, session) {
       input$inCheckboxGroup2
     }
   })
-
+  
   print("center_nodes()")
   center_nodes <- reactive({
     c(s1(), s2())
   })
-
+  
   ids <- reactive({unique(gsub("^[A-Z]+_", "", center_nodes(), perl = TRUE))})
   ances <- reactive({gsub("_.+", "", center_nodes(), perl = TRUE)})
-
+  
   df_data <- reactive({
     req(ids())
     print("df_data")
-    Reduce(rbind, lapply(ids(), getData, "df_edges_v20220905_2"))
+    Reduce(rbind, lapply(ids(), getData, tb_edge))
+    # df_old %>% filter(from %in% list_fine_map_snps | to %in% list_fine_map_snps)
   })
-
+  
   df_centers <- reactive({
     if (isTruthy(input$goButton)) {
       print("df_centers")
@@ -261,19 +268,19 @@ server <- function(input, output, session) {
       init_Phe250_11
     }
   })
-
+  
   observeEvent(input$goButton, {
     ance <- setdiff(ances(),
                     unique(df_centers()$ance[!is.na(df_centers()$pval)]))
     if (length(ance) > 0) {
       show_alert(
         title = "Warning",
-        text = paste0("No data with ", paste(ance, collapse = ", "), "!"),
+        text = paste0("Insufficient data for ", paste(ance, collapse = ", "), "!"),
         type = "warning"
       )
     }
   })
-
+  
   df_p <- reactive({
     req(input$thr_p)
     df <- df_centers()[!is.na(df_centers()$pval), ]
@@ -282,9 +289,9 @@ server <- function(input, output, session) {
     print(length(unique(df_t$to)))
     df[df$to %in% unique(df_t$to), ]
   })
-
+  
   # manhattan ====
-
+  
   output$ui_num_2 <- renderUI({
     if(nrow(df_p()) > 1000){
       # print("num_points_2")
@@ -297,9 +304,9 @@ server <- function(input, output, session) {
       ""
     }
   })
-
+  
   topN <- function(df, topn){
-
+    
     print("topN")
     print(unique(df$from))
     print(!grepl("^\\d.+", unique(df$from), perl = TRUE))
@@ -310,7 +317,7 @@ server <- function(input, output, session) {
     }
     df_n <- df %>% group_by(chrom) %>% summarise(n = n())
     df_n$c <- topn/length(unique(df$ance)) * df_n$n/sum(df_n$n)
-
+    
     df_n$c <- ifelse(df_n$c < 5,
                      sapply(df_n$n, function(x) min(c(x, 5))),
                      df_n$c)
@@ -326,7 +333,7 @@ server <- function(input, output, session) {
     print(nrow(df_top_n))
     df_top_n
   }
-
+  
   df_pval_2 <- reactive({
     req(df_p())
     if (nrow(df_p()) > 1000) {
@@ -337,7 +344,7 @@ server <- function(input, output, session) {
       df_p()
     }
   })
-
+  
   signal_height <- reactive({
     if (grepl("^\\d.+", unique(df_pval_2()$from))) {
       paste0(shinybrowser::get_height() - 150,"px")
@@ -345,7 +352,7 @@ server <- function(input, output, session) {
       paste0(min(600, shinybrowser::get_height() - 150),"px")
     }
   })
-
+  
   # signal_plotly ====
   output$ui_signal_2 <- renderUI({
     print("ui_signal_2")
@@ -361,13 +368,13 @@ server <- function(input, output, session) {
       "No significant signals!"
     }
   })
-
+  
   output$plot_signal_2 <-  renderPlotly({
     if (isTruthy(df_pval_2()) & nrow(df_pval_2()) > 0) {
       signal_plotly(df_pval_2(), thr_pval = input$thr_p, type = "scatter")
     }
   })
-
+  
   # plot_comm ====
   observeEvent(df_comm(), {
     if (nrow(df_comm()) > 10) {
@@ -376,7 +383,7 @@ server <- function(input, output, session) {
       hideTab(inputId = "tab_comp", target = "Shared signals")
     }
   })
-
+  
   output$ui_signal_comm <- renderUI({
     if (isTruthy(df_pval_comm()) & nrow(df_pval_comm()) > 0) {
       print("ui_signal_comm")
@@ -389,7 +396,7 @@ server <- function(input, output, session) {
       "No shared signals at the given signficance level!"
     }
   })
-
+  
   df_comm <- reactive({
     req(input$thr_p)
     df <- df_centers()
@@ -402,7 +409,7 @@ server <- function(input, output, session) {
     }
     df[df$to %in% unique(to), ]
   })
-
+  
   output$ui_num_comm <- renderUI({
     if (nrow(df_comm()) > 500) {
       sliderInput("num_points_comm", 
@@ -414,7 +421,7 @@ server <- function(input, output, session) {
       ""
     }
   })
-
+  
   df_pval_comm <- reactive({
     if (nrow(df_comm()) > 500) {
       req(input$num_points_comm)
@@ -423,12 +430,12 @@ server <- function(input, output, session) {
       df_comm()
     }
   })
-
+  
   output$plot_signal_comm <-  renderPlotly({
     signal_plotly(df_pval_comm(), thr_pval=as.numeric(input$thr_p), type = "scatter")
   })
-
-
+  
+  
   ## hetero ====
   df_hetero <- reactive({
     print("df_hetero")
@@ -446,35 +453,36 @@ server <- function(input, output, session) {
       df_centers()[df_centers()$to %in% df$to, ]
     }
   })
-
-  output$ui_slider_maf <- renderUI({
-    if (nrow(df_hetero()) > 0) {
-      print("output$ui_slider_maf")
-      sliderInput("thr_maf", "Min MAF:",
-                  min = floor(min(df_hetero()$maf) * 100) / 100,
-                  max = ceiling(max(df_hetero()$maf) * 100) / 100,
-                  value = floor(min(df_hetero()$maf) * 100) / 100)
-    } else {
-      show_alert(
-        title = "Warning",
-        text = paste0("No heterogeneity detected at the given FDR level!"),
-        type = "warning"
-      )
-      ""
-    }
-  })
-
+  
+  # output$ui_slider_maf <- renderUI({
+  #   if (nrow(df_hetero()) > 0) {
+  #     print("output$ui_slider_maf")
+  #     sliderInput("thr_maf", "Min MAF:",
+  #                 min = floor(min(df_hetero()$maf) * 100) / 100,
+  #                 max = ceiling(max(df_hetero()$maf) * 100) / 100,
+  #                 value = floor(min(df_hetero()$maf) * 100) / 100)
+  #   } else {
+  #     show_alert(
+  #       title = "Warning",
+  #       text = paste0("No heterogeneity detected at the given FDR level!"),
+  #       type = "warning"
+  #     )
+  #     ""
+  #   }
+  # })
+  
   df_hetero_maf <- reactive({
-    req(input$thr_maf)
+    ## define thr_maf as 0.05! -20230330 Xin
+    # req(input$thr_maf)
     print("df_hetero_maf")
     id <- df_hetero()$to
     for (a in unique(df_hetero()$ance)) {
-      df <- df_hetero()[df_hetero()$ance == a & df_hetero()$maf >= input$thr_maf, ]
+      df <- df_hetero()[df_hetero()$ance == a & df_hetero()$maf >= 0.05, ]
       id <- intersect(id, df$to)
     }
     df_hetero()[df_hetero()$to %in% id, ]
   })
-
+  
   observe({
     req(df_hetero_maf())
     print("output$ui_hetero_groups")
@@ -504,9 +512,9 @@ server <- function(input, output, session) {
       }
     }
   })
-
+  
   # hetero bar ====
-
+  
   observe({
     if (nrow(df_hetero_maf()) > 0) {
       print("ui_barplot")
@@ -557,8 +565,8 @@ server <- function(input, output, session) {
         )})
         output$ui_polar <- renderUI({tagList(
           fluidRow(
-          column(6, h4("Binary traits"), plot3),
-          column(6, h4("Quantitative traits"), plot4))
+            column(6, h4("Binary traits"), plot3),
+            column(6, h4("Quantitative traits"), plot4))
         )})
       }
     } else {
@@ -568,7 +576,7 @@ server <- function(input, output, session) {
       output$ui_polar <- renderUI({""})
     }
   })
-
+  
   output$hetero_bt <- renderPlotly({
     req(input$checkbox_groups)
     req(df_hetero_maf())
@@ -591,7 +599,7 @@ server <- function(input, output, session) {
       }
     }
   })
-
+  
   output$hetero_qt <- renderPlotly({
     req(input$checkbox_groups)
     df_qt <- df_hetero_maf()[df_hetero_maf()$variable == "beta", ]
@@ -606,7 +614,7 @@ server <- function(input, output, session) {
         layout(title = "No heterogeneity detected at the given FDR level!")
     }
   })
-
+  
   # hetero polar ====
   output$polar_bt <- renderEcharts4r({
     req(input$checkbox_groups)
@@ -627,7 +635,7 @@ server <- function(input, output, session) {
       }
     }
   })
-
+  
   output$polar_qt <- renderEcharts4r({
     req(input$checkbox_groups)
     df_qt <- df_hetero_maf()[df_hetero_maf()$variable == "beta", ]
@@ -637,10 +645,10 @@ server <- function(input, output, session) {
                    groups = input$checkbox_groups)
     }
   })
-
-
-  ## set table =====
-
+  
+  
+  # set table =====
+  
   output$set_table <- DT::renderDataTable(DT::datatable({
     print("set_table")
     print(nrow(df_p()))
@@ -653,24 +661,25 @@ server <- function(input, output, session) {
   }, rownames = FALSE,
   options = list(
     pageLength = 10,
+    ordering = FALSE,
     dom = "Blfrtip"),
   ),  server = TRUE)
-
-  ## hideTab ====
+  
+  # hideTab ====
   observeEvent(input$goButton, {
     if (length(input$checkbox_ances) == 1) {
       hideTab(inputId = "tab_comp", target = "Shared signals")
     }
   })
-
+  
   # update ====
-
+  
   observeEvent(input$refresh, {
     reloadData(
       dataTableProxy("table"),
       resetPaging = TRUE,
       clearSelection = c("all"))
-
+    
     x <- character(0)
     updateCheckboxGroupInput(session, "inCheckboxGroup1",
                              "Selected SNP:",
@@ -681,13 +690,13 @@ server <- function(input, output, session) {
                              choices = x,
                              selected = x)
   })
-
+  
   observeEvent(df_input(), {
     reloadData(
       dataTableProxy("table"),
       resetPaging = TRUE,
       clearSelection = c("all"))
-
+    
     x <- character(0)
     updateCheckboxGroupInput(session, "inCheckboxGroup1",
                              "Selected SNP:",
@@ -698,8 +707,8 @@ server <- function(input, output, session) {
                              choices = x,
                              selected = x)
   })
-
-
+  
+  
   observe({
     print("input$table_rows_selected")
     print(input$table_rows_selected)
@@ -746,9 +755,9 @@ server <- function(input, output, session) {
       }
     }
   })
-
+  
   # help ====
-
+  
   observeEvent(input$help, {
     introjs(session,
             options = list(
@@ -757,17 +766,17 @@ server <- function(input, output, session) {
             )
     )
   }, ignoreNULL = FALSE)
-
+  
   shinyhelper::observe_helpers(help_dir = "doc/")
-
+  
   observeEvent(input$instruct, {
     toggleModal(session, "instruction", toggle = "open")
   })
-
+  
   observeEvent(input$bookmark, {
     session$doBookmark()
   })
-
+  
 }
 
 shinyApp(ui = ui, server = server, enableBookmarking  = "server")

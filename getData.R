@@ -40,7 +40,7 @@ getTable <- function(tname){
 }
 
 
-searchDict <- function(text, tname = "dict_v20221014"){
+searchDict <- function(text, tname){
   sql = paste0("select * from ", tname, " where id ilike '%", text, "%' or \"desc\"  ilike '%", text, "%' or \"group\"  ilike '%", text, "%';")
   readDB(sql, tname)
 }

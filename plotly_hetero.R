@@ -5,13 +5,13 @@ plotly_hetero <- function(selected, thr_p = 0.0001, groups = NULL) {
   colors <- list("EUR" = "#FFCCCC",
                  "AFR" = "#377EB8",
                  "AMR" = "#4DAF4A",
-                 "ESA" = "#984EA3")
+                 "EAS" = "#984EA3")
 
   if (!is.null(groups)) {
     selected <- selected[selected$dataset %in% groups, ]
   }
 
-  title = ifelse(toupper(unique(selected$variable)) == "OR", "Odds Ratio", "Beta Coef")
+  title = ifelse(toupper(unique(selected$variable)) == "OR", "Odds Ratio", "Beta Coefficient")
 
   selected$hetero <- signif(selected$p_heter_adj, 2)
   selected$pval <- signif(selected$pval, 2)
