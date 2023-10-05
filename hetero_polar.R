@@ -68,8 +68,6 @@ hetero_polar <- function(selected, thr_p = 0.05, groups = NULL) {
     }"))) |>
     e_bar(value, coord_system = "polar", itemStyle = list(opacity = 0.8)) |>
     e_color(color = as.vector(unlist(colors[sort(ances)]))) |>
-    # e_mark_line("EUR", data = list(type = "average")) |>
-    # e_mark_line(data = list(angleAxis = 0)) |>
     e_tooltip(trigger = "axis",
               formatter = htmlwidgets::JS(paste0("
       function(params){

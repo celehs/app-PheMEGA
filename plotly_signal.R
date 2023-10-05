@@ -46,7 +46,6 @@ signal_plotly <- function(df, thr_pval = 5 * 10^-8, type = "column") {
   fig <- plot_ly(data = df, x = ~desc, y = ~p, color = ~ance,
                  hovertext = ~paste(desc, " (", to, ")",
                                "<br>P-value: ", pval, '<br>', toupper(variable), ': ', value,
-                               # '<br>Heterogeneity adjusted P-value (vs EUR): ', hetero, 
                                '<br>MAF:', maf),
                  hoverinfo = "text",
                  type = 'scatter', mode = 'markers', 
