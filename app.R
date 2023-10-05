@@ -25,7 +25,7 @@ source("plotly_hetero.R")
 source("hetero_polar.R")
 source("out_table.R")
 source("utils.R")
-version <- "v20230920_full"
+version <- Sys.getenv("TB_VERSION")
 tb_dict <- paste0("dict_", version)
 tb_edge <- paste0("df_edges_", version)
 tb_init <- paste0("init_Phe250_11_", version)
