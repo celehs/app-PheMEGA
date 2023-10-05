@@ -275,7 +275,7 @@ server <- function(input, output, session) {
     if (length(ance) > 0) {
       show_alert(
         title = "Warning",
-        text = paste0("Insufficient data for ", paste(ance, collapse = ", "), "!"),
+        text = paste0("Insufficient evidence for heterogeneity: ", paste(ance, collapse = ", ")),
         type = "warning"
       )
     }
@@ -365,7 +365,7 @@ server <- function(input, output, session) {
                      height = signal_height()), type = 6
       )
     } else {
-      "No significant signals!"
+      "No significant signals"
     }
   })
   
@@ -393,7 +393,7 @@ server <- function(input, output, session) {
                      height = signal_height()), type = 6
       )
     } else {
-      "No shared signals at the given signficance level!"
+      "No shared signals at the given signficance level"
     }
   })
   
@@ -464,7 +464,7 @@ server <- function(input, output, session) {
   #   } else {
   #     show_alert(
   #       title = "Warning",
-  #       text = paste0("No heterogeneity detected at the given FDR level!"),
+  #       text = paste0("No heterogeneity detected at the given FDR level"),
   #       type = "warning"
   #     )
   #     ""
@@ -542,7 +542,7 @@ server <- function(input, output, session) {
             echarts4rOutput("polar_bt", width = "100%", height = "700px"),
             type = 6)
         } else {
-          plot1 <- h4("No heterogeneity detected at the given FDR level!")
+          plot1 <- h4("No heterogeneity detected at the given FDR level")
           plot3 <- NULL
         }
         if (nrow(df_hetero_maf()[df_hetero_maf()$variable == "beta", ]) > 0) {
@@ -556,7 +556,7 @@ server <- function(input, output, session) {
             echarts4rOutput("polar_qt", width = "100%", height = "700px"),
             type = 6)
         } else {
-          plot2 <- h4("No heterogeneity detected at the given FDR level!")
+          plot2 <- h4("No heterogeneity detected at the given FDR level")
           plot4 <- NULL
         }
         output$ui_barplot <- renderUI({tagList(fluidRow(
@@ -571,7 +571,7 @@ server <- function(input, output, session) {
       }
     } else {
       output$ui_barplot <- renderUI({
-        h4("No heterogeneity detected at the given FDR level!")
+        h4("No heterogeneity detected at the given FDR level")
       })
       output$ui_polar <- renderUI({""})
     }
@@ -595,7 +595,7 @@ server <- function(input, output, session) {
                       groups = input$checkbox_groups)
       } else {
         plot_ly() %>%
-          layout(title = "No heterogeneity detected at the given FDR level!")
+          layout(title = "No heterogeneity detected at the given FDR level")
       }
     }
   })
@@ -611,7 +611,7 @@ server <- function(input, output, session) {
                     groups = input$checkbox_groups)
     } else{
       plot_ly() %>%
-        layout(title = "No heterogeneity detected at the given FDR level!")
+        layout(title = "No heterogeneity detected at the given FDR level")
     }
   })
   

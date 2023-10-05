@@ -16,7 +16,7 @@ readDB <- function(sql, tname){
   if(tname %in% RPostgres::dbListTables(conn)){
     RPostgres::dbGetQuery(conn = conn, sql)
   } else {
-    print(paste0(tname, " is't in the database!"))
+    print(paste0(tname, " is't in the database"))
     NULL
   }
 }
